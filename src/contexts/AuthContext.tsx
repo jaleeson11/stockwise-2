@@ -29,8 +29,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const initAuth = async () => {
       try {
         const accessToken = localStorage.getItem('accessToken');
-        if (accessToken) {
-          await refreshToken();
+        const refreshToken = localStorage.getItem('refreshToken');
+        
+        console.log('Auth initialization - Checking tokens:', { 
+          hasAccessToken: !!accessToken, 
+          hasRefreshToken: !!refreshToken 
+        });
+
+        if (accessToken && refreshToken) {
+          try {
+            await refreshToken();
+          } catch (refreshError) {
+            console.error('Token refresh failed during initialization:', refreshError);
+            // If refresh fails, clear tokens and continue
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+          }
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
@@ -46,7 +60,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     try {
+      console.log('Attempting login for:', email);
       const response = await authService.login(email, password);
+      console.log('Login successful:', { user: response.user });
+      
       setUser(response.user);
       localStorage.setItem('accessToken', response.accessToken);
       localStorage.setItem('refreshToken', response.refreshToken);
@@ -58,7 +75,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (email: string, password: string, name: string) => {
     try {
+      console.log('Attempting registration for:', email);
       const response = await authService.register(email, password, name);
+      console.log('Registration successful:', { user: response.user });
+      
       setUser(response.user);
       localStorage.setItem('accessToken', response.accessToken);
       localStorage.setItem('refreshToken', response.refreshToken);
@@ -69,6 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
+    console.log('Logging out user');
     setUser(null);
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
@@ -77,15 +98,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshToken = async () => {
     try {
       const refreshToken = localStorage.getItem('refreshToken');
+      console.log('Attempting token refresh');
+      
       if (!refreshToken) {
+        console.error('No refresh token available');
         throw new Error('No refresh token available');
       }
 
       const response = await authService.refreshToken(refreshToken);
+      console.log('Token refresh successful');
+      
       localStorage.setItem('accessToken', response.accessToken);
       
-      // Optionally, you might want to fetch the user data here
-      // if it's not included in the refresh token response
+      // Fetch user data if not already available
+      if (!user) {
+        // You might want to add a getUser endpoint to fetch user data
+        console.log('User data not available after refresh');
+      }
     } catch (error) {
       console.error('Token refresh error:', error);
       logout();

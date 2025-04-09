@@ -2,84 +2,105 @@ import { createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
   palette: {
+    mode: 'dark',
     primary: {
-      main: '#1A73E8',
-      light: '#4285F4',
-      dark: '#1557B0',
+      main: '#3B82F6',
+      light: '#60A5FA',
+      dark: '#2563EB',
     },
     secondary: {
-      main: '#00B2A9',
-      light: '#00D3C7',
-      dark: '#00897F',
+      main: '#A78BFA',
+      light: '#C4B5FD',
+      dark: '#7C3AED',
     },
     success: {
-      main: '#36B37E',
+      main: '#34D399',
+      light: '#6EE7B7',
+      dark: '#059669',
     },
     warning: {
-      main: '#FFAB00',
+      main: '#FBBF24',
+      light: '#FCD34D',
+      dark: '#D97706',
     },
     error: {
-      main: '#FF5630',
+      main: '#F87171',
+      light: '#FCA5A5',
+      dark: '#DC2626',
     },
     info: {
-      main: '#00B8D9',
+      main: '#38BDF8',
+      light: '#7DD3FC',
+      dark: '#0284C7',
     },
     background: {
-      default: '#F8F9FA',
-      paper: '#FFFFFF',
+      default: '#0F172A',
+      paper: '#1E293B',
     },
     text: {
-      primary: '#212529',
-      secondary: '#495057',
+      primary: '#F8FAFC',
+      secondary: '#CBD5E1',
     },
   },
   typography: {
-    fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif",
+    fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
     h1: {
       fontSize: '2.5rem',
       fontWeight: 700,
-      letterSpacing: '-0.02em',
+      letterSpacing: '-0.025em',
+      lineHeight: 1.2,
     },
     h2: {
       fontSize: '2rem',
       fontWeight: 700,
-      letterSpacing: '-0.01em',
+      letterSpacing: '-0.025em',
+      lineHeight: 1.2,
     },
     h3: {
       fontSize: '1.75rem',
       fontWeight: 600,
-      letterSpacing: '-0.01em',
+      letterSpacing: '-0.025em',
+      lineHeight: 1.2,
     },
     h4: {
       fontSize: '1.5rem',
       fontWeight: 600,
-      letterSpacing: '-0.01em',
+      letterSpacing: '-0.025em',
+      lineHeight: 1.2,
     },
     h5: {
       fontSize: '1.25rem',
       fontWeight: 600,
+      letterSpacing: '-0.025em',
+      lineHeight: 1.2,
     },
     h6: {
       fontSize: '1rem',
       fontWeight: 600,
+      letterSpacing: '-0.025em',
+      lineHeight: 1.2,
     },
     subtitle1: {
       fontSize: '1rem',
       fontWeight: 500,
       letterSpacing: '0.01em',
+      lineHeight: 1.5,
     },
     subtitle2: {
       fontSize: '0.875rem',
       fontWeight: 500,
       letterSpacing: '0.01em',
+      lineHeight: 1.5,
     },
     body1: {
       fontSize: '1rem',
       letterSpacing: '0.01em',
+      lineHeight: 1.5,
     },
     body2: {
       fontSize: '0.875rem',
       letterSpacing: '0.01em',
+      lineHeight: 1.5,
     },
     button: {
       textTransform: 'none',
@@ -110,12 +131,14 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: '8px',
-          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+          backgroundColor: '#1E293B',
+          border: '1px solid #334155',
+          borderRadius: '12px',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
           transition: 'transform 250ms ease, box-shadow 250ms ease',
           '&:hover': {
             transform: 'translateY(-2px)',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
           },
         },
       },
@@ -123,17 +146,17 @@ const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: '#FFFFFF',
-          color: '#212529',
-          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+          backgroundColor: '#1E293B',
+          color: '#F8FAFC',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
         },
       },
     },
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          backgroundColor: '#FFFFFF',
-          borderRight: '1px solid #E9ECEF',
+          backgroundColor: '#1E293B',
+          borderRight: '1px solid #334155',
         },
       },
     },
