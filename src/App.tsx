@@ -1,52 +1,121 @@
-import { ThemeProvider } from '@mui/material/styles';
-import theme from './styles/theme';
+import React, { Suspense } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 import MainLayout from './components/layout/MainLayout';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Suspense } from 'react';
-import { routes } from './routes';
-import { CircularProgress, Box } from '@mui/material';
+import Home from './features/auth/Home';
+import Login from './features/auth/Login';
+import Register from './features/auth/Register';
 import Dashboard from './features/dashboard/Dashboard';
 import Inventory from './features/inventory/Inventory';
+import Categories from './features/categories/Categories';
 import Integrations from './features/integrations/Integrations';
 import Orders from './features/orders/Orders';
 import Reports from './features/reports/Reports';
 import Settings from './features/settings/Settings';
-import Categories from './features/categories/Categories';
+import { CircularProgress, Box } from '@mui/material';
 
-function App() {
+const App: React.FC = () => {
   return (
-    <ThemeProvider theme={theme}>
-      <BrowserRouter>
-        <MainLayout>
-          <Suspense
-            fallback={
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: '100vh',
-                }}
-              >
-                <CircularProgress />
-              </Box>
-            }
-          >
-            <Routes>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/inventory" element={<Inventory />} />
-              <Route path="/categories" element={<Categories />} />
-              <Route path="/integrations" element={<Integrations />} />
-              <Route path="/orders" element={<Orders />} />
-              <Route path="/reports" element={<Reports />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/" element={<Dashboard />} />
-            </Routes>
-          </Suspense>
-        </MainLayout>
-      </BrowserRouter>
-    </ThemeProvider>
+    <Router>
+      <AuthProvider>
+        <Suspense
+          fallback={
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              minHeight="100vh"
+            >
+              <CircularProgress />
+            </Box>
+          }
+        >
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+
+            {/* Protected routes */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <Dashboard />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/inventory"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <Inventory />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/categories"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <Categories />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/integrations"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <Integrations />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/orders"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <Orders />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <Reports />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <Settings />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Catch all route */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </AuthProvider>
+    </Router>
   );
-}
+};
 
 export default App;
