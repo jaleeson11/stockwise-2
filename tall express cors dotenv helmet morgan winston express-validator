@@ -1,0 +1,18 @@
+                 List of relations
+ Schema |           Name           | Type  | Owner 
+--------+--------------------------+-------+-------
+ public | _prisma_migrations       | table | root
+ public | categories               | table | root
+ public | inventory                | table | root
+ public | inventory_history        | table | root
+ public | notification_preferences | table | root
+ public | notifications            | table | root
+ public | order_items              | table | root
+ public | orders                   | table | root
+ public | platform_connections     | table | root
+ public | platform_inventory       | table | root
+ public | product_variants         | table | root
+ public | products                 | table | root
+ public | users                    | table | root
+(13 rows)
+
