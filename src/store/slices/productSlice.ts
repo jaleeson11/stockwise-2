@@ -128,6 +128,29 @@ export const updateProductThunk = createAsyncThunk(
   }
 );
 
+// Async thunk for fetching a single product by ID
+export const fetchProductById = createAsyncThunk(
+  'products/fetchProductById',
+  async (productId: string, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`http://localhost:3001/api/products/${productId}`);
+      
+      if (response.data && response.data.success) {
+        return response.data.data;
+      }
+      
+      throw new Error('Invalid response format from API');
+    } catch (error) {
+      console.error('Error fetching product:', error);
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || error.message;
+        return rejectWithValue(errorMessage);
+      }
+      return rejectWithValue('Failed to fetch product');
+    }
+  }
+);
+
 const productSlice = createSlice({
   name: 'products',
   initialState,
@@ -200,6 +223,19 @@ const productSlice = createSlice({
         state.error = null;
       })
       .addCase(updateProductThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(fetchProductById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchProductById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.selectedProduct = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchProductById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

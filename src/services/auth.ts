@@ -1,6 +1,6 @@
 import { api } from './api';
 
-interface LoginResponse {
+export interface LoginResponse {
   user: {
     id: string;
     email: string;
@@ -11,7 +11,7 @@ interface LoginResponse {
   refreshToken: string;
 }
 
-interface RegisterResponse {
+export interface RegisterResponse {
   user: {
     id: string;
     email: string;
@@ -22,7 +22,7 @@ interface RegisterResponse {
   refreshToken: string;
 }
 
-interface RefreshTokenResponse {
+export interface RefreshTokenResponse {
   accessToken: string;
 }
 
@@ -45,7 +45,7 @@ export const authService = {
   },
 
   async refreshToken(refreshToken: string): Promise<RefreshTokenResponse> {
-    const response = await api.post('/auth/refresh-token', {
+    const response = await api.post('/auth/refresh', {
       refreshToken,
     });
     return response.data;

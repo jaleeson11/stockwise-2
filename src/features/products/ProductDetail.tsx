@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -11,11 +11,12 @@ import {
   CircularProgress,
   Alert,
 } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { fetchProductById } from '../../store/slices/productSlice';
 import { fetchProductVariants } from '../../store/slices/variantSlice';
+import VariantForm from '../variants/VariantForm';
 
 const ProductDetail: React.FC = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -25,6 +26,8 @@ const ProductDetail: React.FC = () => {
     useAppSelector((state) => state.products);
   const { items: variants, loading: variantsLoading, error: variantsError } = 
     useAppSelector((state) => state.variants);
+  
+  const [isVariantFormOpen, setIsVariantFormOpen] = useState(false);
   
   useEffect(() => {
     if (productId) {
@@ -124,9 +127,18 @@ const ProductDetail: React.FC = () => {
 
         <Grid item xs={12} md={4}>
           <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Variants
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6">
+                Variants
+              </Typography>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => setIsVariantFormOpen(true)}
+              >
+                Add Variant
+              </Button>
+            </Box>
             <Divider sx={{ my: 2 }} />
             
             {variantsError && (
@@ -181,6 +193,13 @@ const ProductDetail: React.FC = () => {
           </Paper>
         </Grid>
       </Grid>
+
+      <VariantForm
+        open={isVariantFormOpen}
+        onClose={() => setIsVariantFormOpen(false)}
+        productId={selectedProduct.id}
+        productName={selectedProduct.name}
+      />
     </Box>
   );
 };

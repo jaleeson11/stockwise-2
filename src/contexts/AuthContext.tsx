@@ -1,5 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { authService } from '../services/auth';
+import { 
+  loginSuccess, 
+  logout, 
+  refreshTokenSuccess, 
+  refreshTokenFailure 
+} from '../store/slices/authSlice';
+import { RootState } from '../store';
 
 interface User {
   id: string;
@@ -15,14 +23,40 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
-  refreshToken: () => Promise<void>;
+  refreshToken: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const dispatch = useDispatch();
+  const authState = useSelector((state: RootState) => state.auth);
   const [isLoading, setIsLoading] = useState(true);
+
+  const handleTokenRefresh = async () => {
+    try {
+      const storedRefreshToken = localStorage.getItem('refreshToken');
+      
+      if (!storedRefreshToken) {
+        throw new Error('No refresh token available');
+      }
+
+      const response = await authService.refreshToken(storedRefreshToken);
+      
+      // Update Redux state
+      dispatch(refreshTokenSuccess({
+        token: response.accessToken
+      }));
+      
+      // Store new access token
+      localStorage.setItem('accessToken', response.accessToken);
+      return true;
+    } catch (error) {
+      console.error('Token refresh error:', error);
+      dispatch(refreshTokenFailure());
+      return false;
+    }
+  };
 
   useEffect(() => {
     // Check for existing tokens and validate them
@@ -30,43 +64,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const accessToken = localStorage.getItem('accessToken');
         const refreshToken = localStorage.getItem('refreshToken');
+        const userStr = localStorage.getItem('user');
         
-        console.log('Auth initialization - Checking tokens:', { 
-          hasAccessToken: !!accessToken, 
-          hasRefreshToken: !!refreshToken 
-        });
+        if (!accessToken || !refreshToken || !userStr) {
+          // If any of the required items are missing, clear everything
+          dispatch(logout());
+          return;
+        }
 
-        if (accessToken && refreshToken) {
-          try {
-            await refreshToken();
-          } catch (refreshError) {
-            console.error('Token refresh failed during initialization:', refreshError);
-            // If refresh fails, clear tokens and continue
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
+        try {
+          const refreshSuccess = await handleTokenRefresh();
+          if (!refreshSuccess) {
+            dispatch(logout());
           }
+        } catch (refreshError) {
+          console.error('Token refresh failed during initialization:', refreshError);
+          dispatch(logout());
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        dispatch(logout());
       } finally {
         setIsLoading(false);
       }
     };
 
     initAuth();
-  }, []);
+  }, [dispatch]);
 
   const login = async (email: string, password: string) => {
     try {
-      console.log('Attempting login for:', email);
       const response = await authService.login(email, password);
-      console.log('Login successful:', { user: response.user });
       
-      setUser(response.user);
+      // Update Redux state
+      dispatch(loginSuccess({
+        user: response.user,
+        token: response.accessToken
+      }));
+      
+      // Store tokens and user data
       localStorage.setItem('accessToken', response.accessToken);
       localStorage.setItem('refreshToken', response.refreshToken);
+      localStorage.setItem('user', JSON.stringify(response.user));
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -75,61 +114,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (email: string, password: string, name: string) => {
     try {
-      console.log('Attempting registration for:', email);
       const response = await authService.register(email, password, name);
-      console.log('Registration successful:', { user: response.user });
       
-      setUser(response.user);
+      // Update Redux state
+      dispatch(loginSuccess({
+        user: response.user,
+        token: response.accessToken
+      }));
+      
+      // Store tokens and user data
       localStorage.setItem('accessToken', response.accessToken);
       localStorage.setItem('refreshToken', response.refreshToken);
+      localStorage.setItem('user', JSON.stringify(response.user));
     } catch (error) {
       console.error('Registration error:', error);
       throw error;
     }
   };
 
-  const logout = () => {
-    console.log('Logging out user');
-    setUser(null);
+  const handleLogout = () => {
+    dispatch(logout());
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
-  };
-
-  const refreshToken = async () => {
-    try {
-      const refreshToken = localStorage.getItem('refreshToken');
-      console.log('Attempting token refresh');
-      
-      if (!refreshToken) {
-        console.error('No refresh token available');
-        throw new Error('No refresh token available');
-      }
-
-      const response = await authService.refreshToken(refreshToken);
-      console.log('Token refresh successful');
-      
-      localStorage.setItem('accessToken', response.accessToken);
-      
-      // Fetch user data if not already available
-      if (!user) {
-        // You might want to add a getUser endpoint to fetch user data
-        console.log('User data not available after refresh');
-      }
-    } catch (error) {
-      console.error('Token refresh error:', error);
-      logout();
-      throw error;
-    }
+    localStorage.removeItem('user');
   };
 
   const value = {
-    user,
-    isAuthenticated: !!user,
+    user: authState.user,
+    isAuthenticated: authState.isAuthenticated,
     isLoading,
     login,
     register,
-    logout,
-    refreshToken,
+    logout: handleLogout,
+    refreshToken: handleTokenRefresh,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

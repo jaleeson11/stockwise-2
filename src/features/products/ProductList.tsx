@@ -27,12 +27,14 @@ import {
   Cancel as CancelIcon,
   KeyboardArrowDown as KeyboardArrowDownIcon,
   KeyboardArrowUp as KeyboardArrowUpIcon,
+  Delete as DeleteIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { fetchProducts, updateProductThunk, Product } from '../../store/slices/productSlice';
 import { fetchCategories } from '../../store/slices/categorySlice';
 import AddProductModal from './AddProductModal';
+import VariantForm from '../variants/VariantForm';
 
 interface ValidationErrors {
   sku?: string;
@@ -50,6 +52,8 @@ const ProductList: React.FC = () => {
   const [editedProduct, setEditedProduct] = useState<Partial<Product>>({});
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [expandedProductId, setExpandedProductId] = useState<string | null>(null);
+  const [isVariantFormOpen, setIsVariantFormOpen] = useState(false);
+  const [selectedProductForVariant, setSelectedProductForVariant] = useState<string | null>(null);
   
   const productState = useAppSelector((state) => state.products);
   const categoryState = useAppSelector((state) => state.categories);
@@ -137,6 +141,12 @@ const ProductList: React.FC = () => {
     return Object.entries(attributes)
       .map(([key, value]) => `${key}: ${value}`)
       .join(', ');
+  };
+
+  const handleAddVariant = (e: React.MouseEvent, productId: string) => {
+    e.stopPropagation();
+    setSelectedProductForVariant(productId);
+    setIsVariantFormOpen(true);
   };
 
   if (productState.loading || categoryState.loading) {
@@ -330,6 +340,19 @@ const ProductList: React.FC = () => {
                     <TableCell colSpan={6} sx={{ p: 0 }}>
                       <Collapse in={expandedProductId === product.id} timeout="auto" unmountOnExit>
                         <Box sx={{ p: 2, bgcolor: 'background.default' }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                            <Typography variant="subtitle2" color="text.secondary">
+                              Variants
+                            </Typography>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              startIcon={<AddIcon />}
+                              onClick={(e) => handleAddVariant(e, product.id)}
+                            >
+                              New Variant
+                            </Button>
+                          </Box>
                           {product.variants && product.variants.length > 0 ? (
                             <Stack spacing={1}>
                               {product.variants.map((variant) => (
@@ -382,6 +405,18 @@ const ProductList: React.FC = () => {
         open={isAddModalOpen} 
         onClose={() => setIsAddModalOpen(false)} 
       />
+
+      {selectedProductForVariant && (
+        <VariantForm
+          open={isVariantFormOpen}
+          onClose={() => {
+            setIsVariantFormOpen(false);
+            setSelectedProductForVariant(null);
+          }}
+          productId={selectedProductForVariant}
+          productName={productState.products.find(p => p.id === selectedProductForVariant)?.name || ''}
+        />
+      )}
     </Box>
   );
 };
