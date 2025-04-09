@@ -14,8 +14,8 @@ export const categoryValidationRules = [
   
   body('parentId')
     .optional({ nullable: true })
-    .isUUID()
-    .withMessage('Parent category ID must be a valid UUID')
+    .isString()
+    .withMessage('Parent category ID must be a string')
 ];
 
 // Middleware that runs the validation and returns errors if any

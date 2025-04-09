@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '../server';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Create a new category
@@ -8,6 +9,7 @@ import { prisma } from '../server';
 export const createCategory = async (req: Request, res: Response) => {
   try {
     const { name, parentId } = req.body;
+    console.log('Received request data:', { name, parentId });
 
     // Check if category with same name already exists
     const existingCategory = await prisma.category.findFirst({
@@ -38,23 +40,36 @@ export const createCategory = async (req: Request, res: Response) => {
       }
     }
 
-    // Create new category
+    // Generate UUID for the new category
+    const categoryId = uuidv4();
+    console.log('Generated category ID:', categoryId);
+
+    // Create new category with generated UUID
     const category = await prisma.category.create({
       data: {
+        id: categoryId,
         name,
         parentId: parentId || null
       }
     });
 
+    console.log('Created category:', category);
+
     return res.status(201).json({ 
       success: true, 
       data: category 
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating category:', error);
+    console.error('Error details:', {
+      name: error?.name,
+      message: error?.message,
+      stack: error?.stack
+    });
     return res.status(500).json({ 
       error: true, 
-      message: 'Failed to create category' 
+      message: 'Failed to create category',
+      details: error?.message 
     });
   }
 };
